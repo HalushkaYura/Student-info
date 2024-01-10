@@ -2,11 +2,9 @@
 @using StudentInfo.Model
 @using StudentInfo.Model.DTOs
 @using StudentInfo.Pages.Departmant
-@using StudentInfo.Repositories
 @inject Radzen.DialogService dialogService
 @inject IBaseRepository<Faculty> facultyRepository
 @inject IBaseRepository<Department> departmantRepository
-@inject DepartmantRepository departmantRepository2
 
 <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Faculty</RadzenAlert>
@@ -69,7 +67,7 @@
 
     private bool errorVisible;
     private Faculty faculty;
-    private List<Department> listDepartmants = new List<Department>();
+    private List<DepartmantCreate> listDepartmants = new List<DepartmantCreate>();
 
 
     protected override async Task OnInitializedAsync()
@@ -85,7 +83,13 @@
             int createdFacultyId = facultyRepository.CreateElement(faculty);
             foreach (var department in listDepartmants)
             {
-                departmantRepository2.UpdateElement2(department.DepartmentId, department, createdFacultyId);
+                departmantRepository.CreateElement(
+                new Department
+                {
+                        Name = department.Name,
+                        FacultyId = createdFacultyId,
+                }
+    );
             }
 
             dialogService.Close(faculty);
@@ -99,7 +103,7 @@
 
     protected async Task CancelButtonClick(MouseEventArgs args)
     {
-        var copyOfDepartmants = new List<Department>(listDepartmants);
+        var copyOfDepartmants = new List<DepartmantCreate>(listDepartmants);
 
         foreach (var dep in copyOfDepartmants)
         {
@@ -114,14 +118,13 @@
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
     }
 
-    protected async Task AddNewDepartmant(Department departmantCreate)
+    protected async Task AddNewDepartmant(DepartmantCreate departmantCreate)
     {
         listDepartmants.Add(departmantCreate);
     }
 
-    protected async Task RemoveDepartment(Department departmantRemove)
+    protected async Task RemoveDepartment(DepartmantCreate departmantRemove)
     {
-        departmantRepository.DeleteElement(departmantRemove.DepartmentId);
         listDepartmants.Remove(departmantRemove);
     }
 

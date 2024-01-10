@@ -3,6 +3,6 @@
     [Name]          VARCHAR (255) NOT NULL,
     [FacultyId]     INT           NULL,
     PRIMARY KEY CLUSTERED ([DepartmentsId] ASC),
-    FOREIGN KEY ([FacultyId]) REFERENCES [dbo].[Faculties] ([FacultyId])
+    FOREIGN KEY ([FacultyId]) REFERENCES [dbo].[Faculties] ([FacultyId])  ON DELETE CASCADE
 );
 

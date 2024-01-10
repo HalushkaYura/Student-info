@@ -4,9 +4,9 @@
 @inject IBaseRepository<Department> departmantRepository
 
 <RadzenStack>
-    <PageTitle>Add Departmant</PageTitle>
+    <PageTitle>Edit Departmant 2</PageTitle>
 </RadzenStack>
-<RadzenStack>
+@* <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Faculty</RadzenAlert>
     <RadzenTemplateForm TItem="Department" Data="@departmant" Visible="@(departmant!= null)" Submit="@FormSubmit">
 
@@ -21,33 +21,33 @@
         </RadzenStack>
 
     </RadzenTemplateForm>
-</RadzenStack>
+</RadzenStack> *@
 
 @code {
     [Parameter] public int DepartmantId { get; set; }
-    protected override async Task OnInitializedAsync()
-    {
-        departmant = departmantRepository.GetElementById(DepartmantId);
-    }
-    protected bool errorVisible;
-    protected Department departmant;
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     departmant = departmantRepository.GetElementById(DepartmantId);
+    // }
+    // protected bool errorVisible;
+    // protected Department departmant;
 
-    protected async Task FormSubmit()
-    {
-        try
-        {
-            departmantRepository.UpdateElement(DepartmantId, departmant);
-            dialogService.Close(departmant);
-        }
-        catch (Exception ex)
-        {
-            errorVisible = true;
-        }
-    }
+    // protected async Task FormSubmit()
+    // {
+    //     try
+    //     {
+    //         departmantRepository.UpdateElement(DepartmantId, departmant);
+    //         dialogService.Close(departmant);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         errorVisible = true;
+    //     }
+    // }
 
-    protected async Task CancelButtonClick(MouseEventArgs args)
-    {
-        dialogService.Close(null);
-    }
+    // protected async Task CancelButtonClick(MouseEventArgs args)
+    // {
+    //     dialogService.Close(null);
+    // }
 }
 

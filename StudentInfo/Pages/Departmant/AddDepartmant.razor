@@ -9,7 +9,7 @@
 </RadzenStack>
 <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Departmant</RadzenAlert>
-    <RadzenTemplateForm TItem="Department" Data="@departmant" Visible="@(departmant!= null)" Submit="@FormSubmit">
+    <RadzenTemplateForm TItem="DepartmantCreate" Data="@departmant" Visible="@(departmant!= null)" Submit="@FormSubmit">
 
         <RadzenFormField Text="Назва">
             <RadzenTextBox @bind-Value="@departmant.Name" Name="Name" />
@@ -25,19 +25,18 @@
 
 
 @code {
-    [Parameter] public EventCallback<Department> OnDepartmentCreated { get; set; }
+    [Parameter] public EventCallback<DepartmantCreate> OnDepartmentCreated { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        departmant = new Department();
+        departmant = new DepartmantCreate();
     }
 
     protected bool errorVisible;
-    protected Department departmant;
+    protected DepartmantCreate departmant;
     protected async Task FormSubmit()
     {
         try
         {
-            int  tm = departmantRepository.CreateElement(departmant);
             await OnDepartmentCreated.InvokeAsync(departmant);
             dialogService.Close(departmant);
         }

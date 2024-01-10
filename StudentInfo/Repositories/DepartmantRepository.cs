@@ -16,8 +16,8 @@ namespace StudentInfo.Repositories
             var rows = connection.Execute(DataBaseConstants.CreateDepartment,
                 new
                 {
-                    newItem.Name
-                    //newItem.FacultyId
+                    newItem.Name,
+                    newItem.FacultyId
                 }, commandType: CommandType.StoredProcedure);
             return 1;
         }
@@ -47,8 +47,8 @@ namespace StudentInfo.Repositories
             return connection.QueryFirstOrDefault<Department>(DataBaseConstants.GetDepartmentById, new { DepartmentId = id }, commandType: CommandType.StoredProcedure);
         }
 
-        public bool UpdateElement2(int id, Department updateItem, int facultyId)
-        {
+            public bool UpdateElement(int id, Department updateItem)
+            {
                 using var connection = DataBaseConstants.GetConnection();
                 connection.Open();
 
@@ -56,14 +56,9 @@ namespace StudentInfo.Repositories
                     new {
                         UpdateDepartmentId = id,
                         Name = updateItem.Name,
-                        FacultyId =  facultyId
+                        FacultyId = updateItem.FacultyId
                     }, commandType: CommandType.StoredProcedure);
                 return rows > 0;
             }
-
-        public bool UpdateElement(int id, Department updateItem)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

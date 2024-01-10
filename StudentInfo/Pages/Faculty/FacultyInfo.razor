@@ -123,7 +123,7 @@
     {
         if (args is Faculty faculty)
         {
-            await dialogService.OpenAsync("Add Faculty", ds => @<EditFaculty  FacultyId="faculty.FacultyId" />,
+            await dialogService.OpenAsync("Add Faculty", ds => @<EditFaculty  Id="faculty.FacultyId" />,
             new DialogOptions() { Width = "400px", Height = "400px", Resizable = false, Draggable = false });
             RefreshTable();
         }

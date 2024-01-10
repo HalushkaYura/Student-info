@@ -1,6 +1,7 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
 @using StudentInfo.Model.DTOs
+@using StudentInfo.Pages.Departmant
 @inject Radzen.DialogService dialogService
 @inject IBaseRepository<Faculty> FacultyRepository
 @inject IBaseRepository<Department> departmentRepository
@@ -48,11 +49,15 @@
                                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => RemoveDepartment(departmentModel)">
                                         <span class="oi oi-x" aria-hidden="true"></span>
                                     </RadzenButton>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Medium"
+                                                  Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                  Click="@((args) => EditDepartment(departmentModel))" />
                                 </div>
                             </div>
                         </li>
                     }
                 </ul>
+
             </RadzenFieldset>
         }
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
@@ -62,18 +67,18 @@
     </RadzenTemplateForm>
 </RadzenColumn>  
 @code {
-    [Parameter] public int FacultyId { get; set; }
+    [Parameter] public int Id { get; set; }
     private List<Department> departments;
     private List<Department> listNewDepartmants = new List<Department>();
 
     protected override async Task OnInitializedAsync()
     {
-        faculty = FacultyRepository.GetElementById(FacultyId);
-        departments = departmentRepository.GetAllElements().ToList();
+        faculty = FacultyRepository.GetElementById(Id);
+        departments = departmentRepository.GetAllElements().Where(d => d.FacultyId == Id).ToList();
     }
     private void RefreshDepartmant()
     {
-        departments = departmentRepository.GetAllElements().ToList();
+        departments = departmentRepository.GetAllElements().Where(d => d.FacultyId == Id).ToList();
         StateHasChanged();
     }
 
@@ -84,7 +89,7 @@
     {
         try
         {
-            FacultyRepository.UpdateElement(FacultyId, faculty);
+            FacultyRepository.UpdateElement(Id, faculty);
             dialogService.Close(faculty);
         }
         catch (Exception ex)
@@ -95,22 +100,45 @@
 
     protected async Task CancelButtonClick(MouseEventArgs args)
     {
+        var copyOfDepartmants = new List<Department>(listNewDepartmants);
+
+        foreach (var dep in copyOfDepartmants)
+        {
+            await RemoveDepartment(dep);
+        }
         dialogService.Close(null);
     }
 
-    protected async Task AddNewDepartmant(Department departmantCreate)
+    protected async Task AddNewDepartmant(DepartmantCreate departmantCreate)
     {
-        listNewDepartmants.Add(departmantCreate);
+        Department obj = new Department
+            {
+                Name = departmantCreate.Name,
+                FacultyId = Id
+            };
+        departmentRepository.CreateElement(obj);
+        listNewDepartmants.Add(obj);
     }
 
     protected async Task RemoveDepartment(Department departmantRemove)
     {
+        departmentRepository.DeleteElement(departmantRemove.DepartmentId);
         listNewDepartmants.Remove(departmantRemove);
     }
         protected async Task AddDepartmantButtonClick(MouseEventArgs args)
     {
-        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartmant OnDepartmentCreated="AddNewDepartmant" />,
+        await dialogService.OpenAsync("Add Department", ds => @<AddDepartmant OnDepartmentCreated="AddNewDepartmant" />,
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
+    }
+
+    private async Task EditDepartment(object args)
+    {
+        if (args is Department dep)
+        {
+            await dialogService.OpenAsync("Edit Departmant", ds => @<EditDepartmant DepartmantId="dep.DepartmentId" />,
+            new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
+            await OnInitializedAsync();
+        }
     }
 }
 
