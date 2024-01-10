@@ -1,0 +1,74 @@
+﻿@using StudentInfo.Interfaces.IRepositories
+@using StudentInfo.Model
+@inject Radzen.DialogService dialogService
+@inject IFacultyRepository facultyRepository
+
+<RadzenStack>
+    <PageTitle>Add Faculty</PageTitle>
+</RadzenStack>
+<RadzenStack>
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Faculty</RadzenAlert>
+    <RadzenTemplateForm TItem="Faculty" Data="@faculty" Visible="@(faculty != null)" Submit="@FormSubmit">
+        
+        <RadzenFormField Text="Назва" >
+            <RadzenTextBox @bind-Value="@faculty.Name" Name="Name" />
+            <RadzenRequiredValidator Component="Name" Text="Обов'язкове поле!" />
+        </RadzenFormField>
+
+        <RadzenFormField Text="Примітка" >
+            <RadzenTextBox @bind-Value="@faculty.Note" Name="Note" />
+        </RadzenFormField>
+
+@*         <RadzenRow>
+            <RadzenColumn SizeSM="6" SizeMD="10">
+                <RadzenStack>
+                    <RadzenFormField Text="@departmentNumber" Variant="@variant">
+                        <RadzenTextBox @bind-Value="@newDepartmentName" />
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenFormField>
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click="AddNewDepartment"><span class="oi oi-plus pt-1" aria-hidden="true"></span></RadzenButton>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow> *@
+
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>
+
+
+@code {
+    [Parameter] public EventCallback<bool> OnInitialized { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        faculty = new Faculty();
+    }
+
+    protected bool errorVisible;
+    protected Faculty faculty;
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            facultyRepository.CreateFaculty(faculty);
+            dialogService.Close(faculty);
+            await OnInitialized.InvokeAsync();
+
+        }
+        catch (Exception ex)
+        {
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        dialogService.Close(null);
+   }
+}
+  
