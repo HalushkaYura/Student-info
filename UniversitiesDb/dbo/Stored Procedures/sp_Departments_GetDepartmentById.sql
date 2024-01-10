@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[sp_Departments_GetDepartmentById]
-    @DepartmentsId INT
+    @DepartmentId INT
 AS
 BEGIN
     SELECT * FROM [dbo].[Departments]
-    WHERE [DepartmentsId] = @DepartmentsId;
+    WHERE [DepartmentsId] = @DepartmentId;
 END;

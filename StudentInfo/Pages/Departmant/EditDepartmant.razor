@@ -1,6 +1,5 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
-@using StudentInfo.Model.DTOs
 @inject Radzen.DialogService dialogService
 @inject IBaseRepository<Department> departmantRepository
 
@@ -8,7 +7,7 @@
     <PageTitle>Add Departmant</PageTitle>
 </RadzenStack>
 <RadzenStack>
-    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Departmant</RadzenAlert>
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Faculty</RadzenAlert>
     <RadzenTemplateForm TItem="Department" Data="@departmant" Visible="@(departmant!= null)" Submit="@FormSubmit">
 
         <RadzenFormField Text="Назва">
@@ -20,25 +19,24 @@
             <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
             <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" />
         </RadzenStack>
+
     </RadzenTemplateForm>
 </RadzenStack>
 
-
 @code {
-    [Parameter] public EventCallback<Department> OnDepartmentCreated { get; set; }
+    [Parameter] public int DepartmantId { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        departmant = new Department();
+        departmant = departmantRepository.GetElementById(DepartmantId);
     }
-
     protected bool errorVisible;
     protected Department departmant;
+
     protected async Task FormSubmit()
     {
         try
         {
-            int  tm = departmantRepository.CreateElement(departmant);
-            await OnDepartmentCreated.InvokeAsync(departmant);
+            departmantRepository.UpdateElement(DepartmantId, departmant);
             dialogService.Close(departmant);
         }
         catch (Exception ex)
@@ -52,3 +50,4 @@
         dialogService.Close(null);
     }
 }
+

@@ -1,7 +1,9 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
-@inject Radzen.DialogService DialogService
-@inject IFacultyRepository FacultyRepository
+@using StudentInfo.Model.DTOs
+@inject Radzen.DialogService dialogService
+@inject IBaseRepository<Faculty> FacultyRepository
+@inject IBaseRepository<Department> departmentRepository
 
 <PageTitle>Edit Faculty</PageTitle>
 
@@ -28,6 +30,31 @@
             </RadzenColumn>
         </RadzenRow>
 
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
+            <RadzenButton ButtonStyle="ButtonStyle.Info" Text="Add Department" Variant="Variant.Flat" Click="@AddDepartmantButtonClick" />
+        </RadzenStack>
+        @if (departments.Count() != 0)
+        {
+            <RadzenFieldset Text="Departments:">
+                <ul>
+                    @foreach (var departmentModel in departments)
+                    {
+                        <li>
+                            <div class="row">
+                                <div class="col col-9">
+                                    @departmentModel.Name
+                                </div>
+                                <div class="col col-3">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => RemoveDepartment(departmentModel)">
+                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                    </RadzenButton>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </RadzenFieldset>
+        }
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
             <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
             <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" />
@@ -35,12 +62,21 @@
     </RadzenTemplateForm>
 </RadzenColumn>  
 @code {
-    [Parameter] public EventCallback<bool> OnInitialized { get; set; }
     [Parameter] public int FacultyId { get; set; }
+    private List<Department> departments;
+    private List<Department> listNewDepartmants = new List<Department>();
+
     protected override async Task OnInitializedAsync()
     {
-        faculty = FacultyRepository.GetFacultyById(FacultyId);
+        faculty = FacultyRepository.GetElementById(FacultyId);
+        departments = departmentRepository.GetAllElements().ToList();
     }
+    private void RefreshDepartmant()
+    {
+        departments = departmentRepository.GetAllElements().ToList();
+        StateHasChanged();
+    }
+
     protected bool errorVisible;
     protected Faculty faculty;
 
@@ -48,9 +84,8 @@
     {
         try
         {
-            FacultyRepository.UpdateFaculty(FacultyId, faculty);
-            await OnInitialized.InvokeAsync();
-            DialogService.Close(faculty);
+            FacultyRepository.UpdateElement(FacultyId, faculty);
+            dialogService.Close(faculty);
         }
         catch (Exception ex)
         {
@@ -60,7 +95,22 @@
 
     protected async Task CancelButtonClick(MouseEventArgs args)
     {
-        DialogService.Close(null);
+        dialogService.Close(null);
+    }
+
+    protected async Task AddNewDepartmant(Department departmantCreate)
+    {
+        listNewDepartmants.Add(departmantCreate);
+    }
+
+    protected async Task RemoveDepartment(Department departmantRemove)
+    {
+        listNewDepartmants.Remove(departmantRemove);
+    }
+        protected async Task AddDepartmantButtonClick(MouseEventArgs args)
+    {
+        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartmant OnDepartmentCreated="AddNewDepartmant" />,
+        new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
     }
 }
 

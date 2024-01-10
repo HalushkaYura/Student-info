@@ -6,34 +6,40 @@ using System.Data;
 
 namespace StudentInfo.Repositories
 {
-    public class FacultyRepository : IFacultyRepository
+    public class FacultyRepository : IBaseRepository<Faculty>
     {
 
-        public bool CreateFaculty(Faculty newItem)
+        public int CreateElement(Faculty newItem)
         {
-            
+
             using var connection = DataBaseConstants.GetConnection();
             connection.Open();
 
-            var rows = connection.Execute(DataBaseConstants.CreateFaculty, 
-                new 
-                { 
-                    newItem.Name, 
-                    newItem.Note 
-                }, commandType: CommandType.StoredProcedure);
-            return rows > 0;
+            var parameters = new DynamicParameters();
+            parameters.Add("@Name", newItem.Name);
+            parameters.Add("@Note", newItem.Note);
+            parameters.Add("@FacultyId", dbType: DbType.Int32, direction: ParameterDirection.Output);  // Встановлення параметру для виводу Id
+            var rows = connection.Execute(
+            DataBaseConstants.CreateFaculty,
+            parameters,
+            commandType: CommandType.StoredProcedure);
+            if (rows > 0)
+            {
+                return parameters.Get<int>("@FacultyId");
+            }
+            return 0;
         }
 
-        public bool DeleteFaculty(int id)
+        public bool DeleteElement(int id)
         {
             using var connection = DataBaseConstants.GetConnection();
             connection.Open();
 
-            var rows = connection.Execute(DataBaseConstants.DeleteFaculty, new { Id = id }, commandType: CommandType.StoredProcedure);
+            var rows = connection.Execute(DataBaseConstants.DeleteFaculty, new { FacultyId = id }, commandType: CommandType.StoredProcedure);
             return rows > 0;
         }
 
-        public IEnumerable<Faculty> GetAllFaculteties()
+        public IEnumerable<Faculty> GetAllElements()
         {
             using var connection = DataBaseConstants.GetConnection();
             connection.Open();
@@ -41,7 +47,7 @@ namespace StudentInfo.Repositories
             return connection.Query<Faculty>(DataBaseConstants.GetAllFaculties, commandType: CommandType.StoredProcedure);
         }
 
-        public Faculty GetFacultyById(int facultyId)
+        public Faculty GetElementById(int facultyId)
         {
             using var connection = DataBaseConstants.GetConnection();
             connection.Open();
@@ -49,13 +55,23 @@ namespace StudentInfo.Repositories
             return connection.QueryFirstOrDefault<Faculty>(DataBaseConstants.GetFacultyById, new { FacultyId = facultyId }, commandType: CommandType.StoredProcedure);
         }
 
-        public bool UpdateFaculty(int id, Faculty updateItem)
+        public Faculty GetLastItem()
         {
             using var connection = DataBaseConstants.GetConnection();
             connection.Open();
 
-            var rows = connection.Execute(DataBaseConstants.UpdateFaculty, new { Id = id, updateItem.Name, updateItem.Note }, commandType: CommandType.StoredProcedure);
+            return connection.QueryFirstOrDefault<Faculty>(DataBaseConstants.GetLastFaculty, commandType: CommandType.StoredProcedure);
+        }
+
+        public bool UpdateElement(int id, Faculty updateItem)
+        {
+            using var connection = DataBaseConstants.GetConnection();
+            connection.Open();
+
+            var rows = connection.Execute(DataBaseConstants.UpdateFaculty, new { FacultyId = id, updateItem.Name, updateItem.Note }, commandType: CommandType.StoredProcedure);
             return rows > 0;
         }
+
+
     }
 }

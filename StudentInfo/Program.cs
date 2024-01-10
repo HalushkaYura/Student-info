@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 using StudentInfo.Data;
 using StudentInfo.Interfaces.IRepositories;
+using StudentInfo.Model;
 using StudentInfo.Repositories;
 
 namespace StudentInfo
@@ -27,7 +28,8 @@ namespace StudentInfo
             builder.Services.AddScoped<ContextMenuService>();
             builder.Services.AddRadzenComponents();
 
-            builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+            builder.Services.AddScoped<IBaseRepository<Faculty>, FacultyRepository>();
+            builder.Services.AddScoped<IBaseRepository<Department>, DepartmantRepository>();
 
             var app = builder.Build();
 

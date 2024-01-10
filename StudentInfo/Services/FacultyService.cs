@@ -6,16 +6,16 @@ namespace StudentInfo.Services
 {
     public class FacultyService : IFacultyService
     {
-        protected readonly IFacultyRepository _facultetRepository;
+        protected readonly IBaseRepository<Faculty> _facultetRepository;
 
-        public FacultyService(IFacultyRepository facultyRepository)
+        public FacultyService(IBaseRepository<Faculty> facultyRepository)
         {
             _facultetRepository = facultyRepository;
         }
         public async Task<IEnumerable<Faculty>> GetAllFaculties()
         {
 
-            return  _facultetRepository.GetAllFaculteties();
+            return  _facultetRepository.GetAllElements();
         }
     }
 }

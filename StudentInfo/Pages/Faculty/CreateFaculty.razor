@@ -1,38 +1,62 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
+@using StudentInfo.Model.DTOs
+@using StudentInfo.Pages.Departmant
+@using StudentInfo.Repositories
 @inject Radzen.DialogService dialogService
-@inject IFacultyRepository facultyRepository
+@inject IBaseRepository<Faculty> facultyRepository
+@inject IBaseRepository<Department> departmantRepository
+@inject DepartmantRepository departmantRepository2
 
-<RadzenStack>
-    <PageTitle>Add Faculty</PageTitle>
-</RadzenStack>
 <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Faculty</RadzenAlert>
+
     <RadzenTemplateForm TItem="Faculty" Data="@faculty" Visible="@(faculty != null)" Submit="@FormSubmit">
-        
-        <RadzenFormField Text="Назва" >
-            <RadzenTextBox @bind-Value="@faculty.Name" Name="Name" />
-            <RadzenRequiredValidator Component="Name" Text="Обов'язкове поле!" />
-        </RadzenFormField>
 
-        <RadzenFormField Text="Примітка" >
-            <RadzenTextBox @bind-Value="@faculty.Note" Name="Note" />
-        </RadzenFormField>
+        <RadzenRow style="margin-bottom: 1rem">
+            <RadzenColumn SizeMD="3">
+                <RadzenLabel Text="Name" Component="Name" style="width: 100%" />
+            </RadzenColumn>
+            <RadzenColumn SizeMD="9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@faculty.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Name is required" />
+            </RadzenColumn>
+        </RadzenRow>
 
-@*         <RadzenRow>
-            <RadzenColumn SizeSM="6" SizeMD="10">
-                <RadzenStack>
-                    <RadzenFormField Text="@departmentNumber" Variant="@variant">
-                        <RadzenTextBox @bind-Value="@newDepartmentName" />
-                    </RadzenFormField>
-                </RadzenStack>
+        <RadzenRow style="margin-bottom: 1rem">
+            <RadzenColumn SizeMD="3">
+                <RadzenLabel Text="Note" Component="Note" style="width: 100%" />
             </RadzenColumn>
-            <RadzenColumn>
-                <RadzenFormField>
-                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click="AddNewDepartment"><span class="oi oi-plus pt-1" aria-hidden="true"></span></RadzenButton>
-                </RadzenFormField>
+            <RadzenColumn SizeMD="9">
+                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@faculty.Note" Name="Note" />
             </RadzenColumn>
-        </RadzenRow> *@
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
+            <RadzenButton ButtonStyle="ButtonStyle.Info" Text="Add Department" Variant="Variant.Flat" Click="@AddDepartmantButtonClick" />
+        </RadzenStack>
+
+        @if (listDepartmants.Count() != 0)
+        {
+            <RadzenFieldset Text="Departments:">
+                <ul>
+                    @foreach (var departmentModel in listDepartmants)
+                    {
+                        <li>
+                            <div class="row">
+                                <div class="col col-9">
+                                    @departmentModel.Name
+                                </div>
+                                <div class="col col-3">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => RemoveDepartment(departmentModel)">
+                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                    </RadzenButton>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </RadzenFieldset>
+        }
 
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
             <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
@@ -41,24 +65,30 @@
     </RadzenTemplateForm>
 </RadzenStack>
 
-
 @code {
-    [Parameter] public EventCallback<bool> OnInitialized { get; set; }
+
+    private bool errorVisible;
+    private Faculty faculty;
+    private List<Department> listDepartmants = new List<Department>();
+
+
     protected override async Task OnInitializedAsync()
     {
         faculty = new Faculty();
+
     }
 
-    protected bool errorVisible;
-    protected Faculty faculty;
     protected async Task FormSubmit()
     {
         try
         {
-            facultyRepository.CreateFaculty(faculty);
-            dialogService.Close(faculty);
-            await OnInitialized.InvokeAsync();
+            int createdFacultyId = facultyRepository.CreateElement(faculty);
+            foreach (var department in listDepartmants)
+            {
+                departmantRepository2.UpdateElement2(department.DepartmentId, department, createdFacultyId);
+            }
 
+            dialogService.Close(faculty);
         }
         catch (Exception ex)
         {
@@ -66,9 +96,34 @@
         }
     }
 
+
     protected async Task CancelButtonClick(MouseEventArgs args)
     {
+        var copyOfDepartmants = new List<Department>(listDepartmants);
+
+        foreach (var dep in copyOfDepartmants)
+        {
+           await RemoveDepartment(dep);
+        }
         dialogService.Close(null);
-   }
+    }
+
+    protected async Task AddDepartmantButtonClick(MouseEventArgs args)
+    {
+        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartmant OnDepartmentCreated="AddNewDepartmant" />,
+        new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
+    }
+
+    protected async Task AddNewDepartmant(Department departmantCreate)
+    {
+        listDepartmants.Add(departmantCreate);
+    }
+
+    protected async Task RemoveDepartment(Department departmantRemove)
+    {
+        departmantRepository.DeleteElement(departmantRemove.DepartmentId);
+        listDepartmants.Remove(departmantRemove);
+    }
+
+
 }
-  
