@@ -3,6 +3,6 @@
     @FacultyId INT
 AS
 BEGIN
-    INSERT INTO [dbo].[Groups] ([Name], [Count], [FacultyId])
-    VALUES (@Name, 0, @FacultyId);
+    INSERT INTO [dbo].[Groups] ([Name], [FacultyId])
+    VALUES (@Name, @FacultyId);
 END;

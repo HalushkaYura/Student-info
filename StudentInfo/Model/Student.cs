@@ -11,13 +11,7 @@
 
         public int Course { get; set; }
 
-        public bool? Sholarship { get; set; }
-
-        public bool? Payer { get; set; }
-
         public DateTime? BornDate { get; set; }
-
-        public string Sex { get; set; }
 
         public decimal GPA { get; set; }
 

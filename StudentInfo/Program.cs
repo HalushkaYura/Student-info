@@ -27,9 +27,14 @@ namespace StudentInfo
             builder.Services.AddScoped<TooltipService>();
             builder.Services.AddScoped<ContextMenuService>();
             builder.Services.AddRadzenComponents();
+            
 
             builder.Services.AddScoped<IBaseRepository<Faculty>, FacultyRepository>();
             builder.Services.AddScoped<IBaseRepository<Department>, DepartmantRepository>();
+            builder.Services.AddScoped<IBaseRepository<Student>, StudentRepository>();
+            builder.Services.AddScoped<IBaseRepository<StudentInfo.Model.Group>, GroupRepository>();
+
+
 
             var app = builder.Build();
 

@@ -1,0 +1,76 @@
+﻿@using StudentInfo.Interfaces.IRepositories
+@using StudentInfo.Model
+@inject Radzen.DialogService dialogService
+@inject IBaseRepository<Department> departmantRepository
+@inject NotificationService notificationService
+
+<RadzenStack>
+    <PageTitle>Edit Department</PageTitle>
+</RadzenStack>
+<RadzenButton Text=" dsadasdasd "></RadzenButton>
+
+<RadzenStack>
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Department</RadzenAlert>
+    <RadzenTemplateForm TItem="Department" Data="@DepartmentUpdate" Visible="@(DepartmentUpdate != null)" Submit="@FormSubmit">
+
+        <RadzenFormField Text="Назва">
+            <RadzenTextBox @bind-Value="@DepartmentUpdate.Name" Name="Name" />
+            <RadzenRequiredValidator Component="Name" Text="Обов'язкове поле!" />
+        </RadzenFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Text="Delete" Click="DeleteDepartment" />
+            @* <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" /> *@
+        </RadzenStack>
+
+    </RadzenTemplateForm>
+</RadzenStack>
+
+@code {
+    [Parameter] 
+    public Department DepartmentUpdate { get; set; }
+
+    protected bool errorVisible;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            departmantRepository.UpdateElement(DepartmentUpdate.DepartmentId, DepartmentUpdate);
+            dialogService.Close(DepartmentUpdate);
+        }
+        catch (Exception ex)
+        {
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        dialogService.Close(null);
+    }
+    // private string GetName() => DepartmentId.ToString();
+
+    private async Task DeleteDepartment()
+    {
+        try
+        {
+            if (await dialogService.Confirm("Are you sure you want to delete this record?") == true)
+            {
+                departmantRepository.DeleteElement(DepartmentUpdate.DepartmentId);
+                dialogService.Close(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            notificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = $"Error",
+                    Detail = $"Unable to delete Faculty"
+                });
+        }
+    }
+}
+

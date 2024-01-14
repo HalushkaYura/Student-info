@@ -34,17 +34,15 @@
         <RadzenStack AlignItems="Radzen.AlignItems.Center" class="rz-py-4 rz-py-lg-6"  Style="border-bottom: var(--rz-panel-menu-item-border);">
             <RadzenRow AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.Start ">
                 <RadzenImage Path="images/logo.png" style="width: 38px; height: 38px; margin-left: 10px; margin-right: 10px;" Click="@(e => NavigationManager.NavigateTo("/"))"></RadzenImage>
-                <RadzenText Text="Studies"  TextStyle="Radzen.Blazor.TextStyle.Subtitle2" style="@(sidebarExpanded ? "color: var(--rz-sidebar-color); margin-bottom: 0px; padding-right: 10px; font-size: 20px;" : "display: none; ")" />
+                <RadzenText Text="Studies" TextStyle="Radzen.Blazor.TextStyle.Subtitle2" Style="@(sidebarExpanded ? "color: antiquewhite; margin-bottom: 0px; padding-right: 10px; font-size: 20px;" : "display: none; ")" />
             </RadzenRow>
         </RadzenStack>
 
 
-        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)" ShowArrow="true" Style="background-color: #171719">
-            <RadzenPanelMenuItem Text="Overview" Icon="home" Click="@(e => NavigationManager.NavigateTo("faculty"))" />
-            <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" />
-            <RadzenPanelMenuItem Text="UI Fundamentals" Icon="auto_awesome">
-                <RadzenPanelMenuItem Text="Themes" Icon="color_lens" />
-                <RadzenPanelMenuItem Text="Colors" Icon="invert_colors" />
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText  : MenuItemDisplayStyle.Icon)" ShowArrow="true" Style="background-color: #171719">
+            <RadzenPanelMenuItem Text="Faculties" Icon="home" Style="color:antiquewhite" Click="@(e => NavigationManager.NavigateTo("faculty"))" />
+            <RadzenPanelMenuItem Text="Students" Icon="assignment_ind" Style="color:antiquewhite" Click="@(e => NavigationManager.NavigateTo("student"))" />
+            <RadzenPanelMenuItem Text="Groups" Style="color:antiquewhite" Icon="auto_awesome" Click="@(e => NavigationManager.NavigateTo("groups"))">
             </RadzenPanelMenuItem>
         </RadzenPanelMenu>
     </RadzenSidebar>

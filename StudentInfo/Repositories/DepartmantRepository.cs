@@ -54,7 +54,7 @@ namespace StudentInfo.Repositories
 
                 var rows = connection.Execute(DataBaseConstants.UpdateDepartment, 
                     new {
-                        UpdateDepartmentId = id,
+                        DepartmentId = id,
                         Name = updateItem.Name,
                         FacultyId = updateItem.FacultyId
                     }, commandType: CommandType.StoredProcedure);

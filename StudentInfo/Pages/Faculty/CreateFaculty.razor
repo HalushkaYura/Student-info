@@ -1,7 +1,9 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
 @using StudentInfo.Model.DTOs
-@using StudentInfo.Pages.Departmant
+@using StudentInfo.Pages.Faculty
+@using StudentInfo.Pages.Department
+
 @inject Radzen.DialogService dialogService
 @inject IBaseRepository<Faculty> facultyRepository
 @inject IBaseRepository<Department> departmantRepository
@@ -18,7 +20,7 @@
             <RadzenColumn SizeMD="9">
                 <RadzenTextBox style="display: block; width: 100%" @bind-Value="@faculty.Name" Name="Name" />
                 <RadzenRequiredValidator Component="Name" Text="Name is required" />
-            </RadzenColumn>
+            </RadzenColumn> 
         </RadzenRow>
 
         <RadzenRow style="margin-bottom: 1rem">
@@ -73,7 +75,6 @@
     protected override async Task OnInitializedAsync()
     {
         faculty = new Faculty();
-
     }
 
     protected async Task FormSubmit()
@@ -114,7 +115,7 @@
 
     protected async Task AddDepartmantButtonClick(MouseEventArgs args)
     {
-        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartmant OnDepartmentCreated="AddNewDepartmant" />,
+        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartmant" />,
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
     }
 

@@ -35,34 +35,41 @@
                     <RadzenDataGridColumn TItem="Faculty" Property="FacultyId" Title="Faculty Id">
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn TItem="Faculty" Property="Name" Title="Name">
-                    </RadzenDataGridColumn>
-
-                     <RadzenDataGridColumn TItem="Faculty" Title="Department" Sortable="false" Filterable="false">
+                    <RadzenDataGridColumn TItem="Faculty" Property="Name" Title="Name" Width="200px" TextAlign="TextAlign.Left">
                         <Template Context="faculty">
-                            <ul>
-                                @foreach (var department in departments)
-                                {
-                                    @if (department.FacultyId == faculty.FacultyId)
-                                    {
-                                        <li>@department.Name.ToString()</li>
-                                    }
-                                }
-                            </ul>
+                            <div class="wrap-text">@faculty.Name</div>
                         </Template>
-                    </RadzenDataGridColumn> 
-
-                    <RadzenDataGridColumn TItem="Faculty" Property="Note" Title="Note">
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn TItem="Faculty" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn TItem="Faculty" Title="Department" Sortable="false" Filterable="false" Width="300px">
                         <Template Context="faculty">
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
-                                          Shade="Shade.Lighter" Variant="Variant.Flat"
-                                          Click="@((args) => GridDeleteFacultyButtonClick(args, faculty))" />
+                            <RadzenListBox @bind-Value="@selectedDepartment" Data="@GetDepartmentsForFaculty(faculty.FacultyId)" TextProperty="Name" ValueProperty="Name" 
+                                           Style="width: 100%; max-height: 100px; overflow-y: auto; white-space: normal; word-wrap: break-word; white-space]"
+                                           InputAttributes="@(new Dictionary<string, object>(){ { "aria-label", "select department" }})">
+                                <Template Context="listBoxContext">
+                                    <div style="display: flex; align-items: flex-start;">
+                                        <RadzenIcon Icon="label" style="margin-right: 5px;" />
+                                        @((listBoxContext as Department).Name)
+                                    </div>
+                                </Template>
+                            </RadzenListBox>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Faculty" Property="Note" Title="Note" Width="200px" TextAlign="TextAlign.Left">
+                        <Template Context="faculty">
+                            <div class="wrap-text" style="overflow:auto; max-height:100px;">@faculty.Note</div>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Faculty" Filterable="false" Sortable="false" Width="150px" TextAlign="TextAlign.Center">
+                        <Template Context="faculty">
                             <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Medium"
                                           Shade="Shade.Lighter" Variant="Variant.Flat"
                                           Click="@((args) => EditRow(faculty))" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                                          Shade="Shade.Lighter" Variant="Variant.Flat"
+                                          Click="@((args) => GridDeleteFacultyButtonClick(args, faculty))" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
@@ -77,9 +84,10 @@
 
 @code {
 
-    protected IEnumerable<Faculty> faculties;
+    protected List<Faculty> faculties;
     protected RadzenDataGrid<Faculty> grid0;
-    private List<Department> departments; 
+    private List<Department> departments;
+    private string selectedDepartment;
 
     protected string search = "";
 
@@ -95,7 +103,7 @@
     private void RefreshTable()
     {
 
-        faculties = facultyRepository.GetAllElements();
+        faculties = facultyRepository.GetAllElements().ToList();
         StateHasChanged();
     }
     private void RefreshDepartmant()
@@ -106,7 +114,7 @@
     protected override async Task OnInitializedAsync()
     {
         RefreshTable();
-        faculties = facultyRepository.GetAllElements();
+        faculties = facultyRepository.GetAllElements().ToList();
         departments = departmentRepository.GetAllElements().ToList();
     }
 
@@ -123,7 +131,7 @@
     {
         if (args is Faculty faculty)
         {
-            await dialogService.OpenAsync("Add Faculty", ds => @<EditFaculty  Id="faculty.FacultyId" />,
+            await dialogService.OpenAsync("Edit Faculty", ds => @<EditFaculty  Id="faculty.FacultyId" />,
             new DialogOptions() { Width = "400px", Height = "400px", Resizable = false, Draggable = false });
             RefreshTable();
         }
@@ -154,6 +162,10 @@
         }
     }
 
+    
+    
+    //------------------------------------------------------------------------------
+    
     protected async Task GridDeleteDepartmantClick(object args, Department departmant)
     {
         try
@@ -177,6 +189,11 @@
                     Detail = $"Unable to delete Faculty"
                 });
         }
+    }
+
+    private List<Department> GetDepartmentsForFaculty(int facultyId)
+    {
+        return departments.Where(d => d.FacultyId == facultyId).ToList();
     }
 
 }

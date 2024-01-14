@@ -1,0 +1,136 @@
+﻿@page "/groups"
+@using StudentInfo.Interfaces.IRepositories
+@using StudentInfo.Model
+@using GroupModel = StudentInfo.Model.Group
+
+@inject NotificationService notificationService
+@inject IBaseRepository<Faculty> facultyRepository
+@inject IBaseRepository<GroupModel> groupRepository
+@inject IJSRuntime JSRuntime
+@inject DialogService dialogService
+
+
+
+<PageTitle>Groups</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="Groups" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton IconColor="Danger" Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" />
+    <RadzenRow>
+        <RadzenColumn SizeMD=12>
+            <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+                            Data="@groups" TItem="GroupModel" RowSelect="@EditRow">
+                <Columns>
+                    <RadzenDataGridColumn TItem="GroupModel" Property="GroupId" Title="Group Id">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="GroupModel" Property="Name" Title="Name">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="GroupModel" Property="FacultyId" Title="Faculty">
+                        <Template Context="_group">
+                            <div class="wrap-text">
+                                @(GetFacultyName(_group.FacultyId))
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="GroupModel" Property="Count" Title="Count">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="GroupModel" Property="GPA" Title="G P A">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="GroupModel" Filterable="false" Sortable="false" Width="150px" TextAlign="TextAlign.Center">
+                        <Template Context="group">
+
+                            <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Medium"
+                                          Shade="Shade.Lighter" Variant="Variant.Flat"
+                                          Click=@(args => EditRow(group)) @onclick:stopPropagation="true" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                                          Shade="Shade.Lighter" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, group)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+
+            </RadzenDataGrid>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
+
+@code {
+    protected List<GroupModel> groups;
+
+    protected RadzenDataGrid<GroupModel> grid0;
+
+    protected string search = "";
+
+    protected async Task Search(ChangeEventArgs args)
+    {
+        search = $"{args.Value}";
+
+        await grid0.GoToPage(0);
+
+        RefreshTable();
+    }
+    private  string GetFacultyName(int facultyId)
+    {
+        var faculty = facultyRepository.GetElementById(facultyId);
+        return faculty?.Name ?? "Unknown Faculty";
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        groups = groupRepository.GetAllElements().ToList();
+    }
+
+    protected async Task AddButtonClick(MouseEventArgs args)
+    {
+        await dialogService.OpenAsync<AddGroup>("Add Group", null);
+        await grid0.Reload();
+        RefreshTable();
+    }
+
+    protected async Task EditRow(GroupModel args)
+    {
+        await dialogService.OpenAsync<EditGroup>("Edit Group", new Dictionary<string, object> { { "GroupId", args.GroupId } });
+        RefreshTable();
+    }
+
+    protected async Task GridDeleteButtonClick(MouseEventArgs args, GroupModel _group)
+    {
+        try
+        {
+            if (await dialogService.Confirm("Are you sure you want to delete this record?") == true)
+            {
+                var deleteResult = groupRepository.DeleteElement(_group.GroupId);
+                RefreshTable();
+
+                if (deleteResult != null)
+                {
+                    await grid0.Reload();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            notificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = $"Error",
+                    Detail = $"Unable to delete Group"
+                });
+        }
+    }
+
+    private void RefreshTable()
+    {
+        groups = groupRepository.GetAllElements().ToList();
+    }
+}
+
+

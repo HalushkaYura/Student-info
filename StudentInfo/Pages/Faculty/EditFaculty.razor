@@ -1,7 +1,8 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
 @using StudentInfo.Model.DTOs
-@using StudentInfo.Pages.Departmant
+@using StudentInfo.Pages.Department
+@using Radzen.Blazor;
 @inject Radzen.DialogService dialogService
 @inject IBaseRepository<Faculty> FacultyRepository
 @inject IBaseRepository<Department> departmentRepository
@@ -10,14 +11,14 @@
 
   <RadzenColumn SizeMD=12>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Faculty</RadzenAlert>
-    <RadzenTemplateForm TItem="StudentInfo.Model.Faculty" Data="@faculty" Visible="@(faculty != null)" Submit="@FormSubmit">           
-        
+    <RadzenTemplateForm TItem="StudentInfo.Model.Faculty" Data="@faculty" Visible="@(faculty != null)" Submit="@FormSubmit">
+
         <RadzenRow style="margin-bottom: 1rem">
             <RadzenColumn SizeMD="3">
                 <RadzenLabel Text="Name" Component="Name" style="width: 100%" />
             </RadzenColumn>
             <RadzenColumn SizeMD="9">
-                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@faculty.Name" Name="Name" />
+                <RadzenTextBox style="display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" @bind-Value="@faculty.Name" Name="Name" />
                 <RadzenRequiredValidator Component="Name" Text="Name is required" />
             </RadzenColumn>
         </RadzenRow>
@@ -27,54 +28,64 @@
                 <RadzenLabel Text="Note" Component="Note" style="width: 100%" />
             </RadzenColumn>
             <RadzenColumn SizeMD="9">
-                <RadzenTextBox style="display: block; width: 100%" @bind-Value="@faculty.Note" Name="Note" />
+                <RadzenTextBox style="display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" @bind-Value="@faculty.Note" Name="Note" />
             </RadzenColumn>
         </RadzenRow>
 
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
             <RadzenButton ButtonStyle="ButtonStyle.Info" Text="Add Department" Variant="Variant.Flat" Click="@AddDepartmantButtonClick" />
         </RadzenStack>
-        @if (departments.Count() != 0)
-        {
-            <RadzenFieldset Text="Departments:">
-                <ul>
-                    @foreach (var departmentModel in departments)
-                    {
-                        <li>
-                            <div class="row">
-                                <div class="col col-9">
-                                    @departmentModel.Name
-                                </div>
-                                <div class="col col-3">
-                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => RemoveDepartment(departmentModel)">
-                                        <span class="oi oi-x" aria-hidden="true"></span>
-                                    </RadzenButton>
-                                    <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Medium"
-                                                  Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                  Click="@((args) => EditDepartment(departmentModel))" />
-                                </div>
-                            </div>
-                        </li>
-                    }
-                </ul>
+<div class="rz-p-sm-12 rz-text-align-center">
 
-            </RadzenFieldset>
-        }
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+            @if (departments.Count() != 0)
+            {
+                <RadzenFieldset Text="Departments:">
+                    <ul>
+                        @foreach (var departmentModel in departments)
+                        {
+                            <li>
+                                <div class="row">
+                                    <div class="col col-9">
+                                        @departmentModel.Name
+                                    </div>
+                                    <div class="col col-3">
+                                        <RadzenButton ButtonStyle="ButtonStyle.Warning" ButtonType="ButtonType.Button" Icon="edit" Click="@(() => EditDepartment(departmentModel))" />
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </RadzenFieldset>
+            }
+</div>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem">
             <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" />
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
         </RadzenStack>
     </RadzenTemplateForm>
 </RadzenColumn>  
 @code {
     [Parameter] public int Id { get; set; }
     private List<Department> departments;
+    private List<Department> originDepartments;
     private List<Department> listNewDepartmants = new List<Department>();
+    private string selectedDepartment;
+
+
+    // private void OnListBoxChange(ChangeEventArgs e)
+    // {
+    //     if (int.TryParse(e.Value.ToString(), out int value))
+    //     {
+    //         selectedDepartmentId = value;
+    //         StateHasChanged();
+    //     }
+    // }
 
     protected override async Task OnInitializedAsync()
     {
         faculty = FacultyRepository.GetElementById(Id);
         departments = departmentRepository.GetAllElements().Where(d => d.FacultyId == Id).ToList();
+        originDepartments = departments;
     }
     private void RefreshDepartmant()
     {
@@ -89,6 +100,7 @@
     {
         try
         {
+
             FacultyRepository.UpdateElement(Id, faculty);
             dialogService.Close(faculty);
         }
@@ -107,38 +119,46 @@
             await RemoveDepartment(dep);
         }
         dialogService.Close(null);
+        RefreshDepartmant();
     }
 
     protected async Task AddNewDepartmant(DepartmantCreate departmantCreate)
     {
         Department obj = new Department
-            {
-                Name = departmantCreate.Name,
-                FacultyId = Id
-            };
+                {
+                    Name = departmantCreate.Name,
+                    FacultyId = Id
+                };
+
         departmentRepository.CreateElement(obj);
         listNewDepartmants.Add(obj);
+        RefreshDepartmant();
     }
 
     protected async Task RemoveDepartment(Department departmantRemove)
     {
         departmentRepository.DeleteElement(departmantRemove.DepartmentId);
         listNewDepartmants.Remove(departmantRemove);
+        RefreshDepartmant();
     }
-        protected async Task AddDepartmantButtonClick(MouseEventArgs args)
+
+    protected async Task AddDepartmantButtonClick(MouseEventArgs args)
     {
-        await dialogService.OpenAsync("Add Department", ds => @<AddDepartmant OnDepartmentCreated="AddNewDepartmant" />,
+
+        await dialogService.OpenAsync("Add Department", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartmant" />,
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
     }
 
-    private async Task EditDepartment(object args)
+    private List<Department> GetDepartmentsForFaculty(int facultyId)
     {
-        if (args is Department dep)
-        {
-            await dialogService.OpenAsync("Edit Departmant", ds => @<EditDepartmant DepartmantId="dep.DepartmentId" />,
-            new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
-            await OnInitializedAsync();
-        }
+        return departments.Where(d => d.FacultyId == facultyId).ToList();
+    }
+
+    protected async Task EditDepartment(Department departmentToEdit)
+    {
+        await dialogService.OpenAsync("Edit Department", ds => @<EditDepartment  DepartmentUpdate="@departmentToEdit" />,
+        new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
+        RefreshDepartmant();
     }
 }
 
