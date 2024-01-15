@@ -3,5 +3,5 @@
 AS
 BEGIN
     SELECT * FROM [dbo].[Departments]
-    WHERE [DepartmentsId] = @DepartmentId;
+    WHERE [DepartmentId] = @DepartmentId;
 END;

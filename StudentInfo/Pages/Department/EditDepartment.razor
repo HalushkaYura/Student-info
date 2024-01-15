@@ -1,17 +1,17 @@
 ﻿@using StudentInfo.Interfaces.IRepositories
 @using StudentInfo.Model
+@using StudentInfo.Model.DTOs
 @inject Radzen.DialogService dialogService
-@inject IBaseRepository<Department> departmantRepository
+@inject IBaseRepository<Department> departmentRepository
 @inject NotificationService notificationService
 
 <RadzenStack>
     <PageTitle>Edit Department</PageTitle>
 </RadzenStack>
-<RadzenButton Text=" dsadasdasd "></RadzenButton>
 
 <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Department</RadzenAlert>
-    <RadzenTemplateForm TItem="Department" Data="@DepartmentUpdate" Visible="@(DepartmentUpdate != null)" Submit="@FormSubmit">
+    <RadzenTemplateForm TItem="DepartmentCreate" Data="@DepartmentUpdate" Visible="@(DepartmentUpdate != null)" Submit="@FormSubmit">
 
         <RadzenFormField Text="Назва">
             <RadzenTextBox @bind-Value="@DepartmentUpdate.Name" Name="Name" />
@@ -21,7 +21,7 @@
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
             <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
             <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Text="Delete" Click="DeleteDepartment" />
-            @* <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" /> *@
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" /> 
         </RadzenStack>
 
     </RadzenTemplateForm>
@@ -29,7 +29,11 @@
 
 @code {
     [Parameter] 
-    public Department DepartmentUpdate { get; set; }
+    public DepartmentCreate DepartmentUpdate { get; set; }
+    [Parameter] 
+    public EventCallback<DepartmentCreate> OnDepartmentEdit { get; set; }
+    [Parameter]
+    public EventCallback<DepartmentCreate> OnDepartmentRemove { get; set; }
 
     protected bool errorVisible;
 
@@ -37,8 +41,9 @@
     {
         try
         {
-            departmantRepository.UpdateElement(DepartmentUpdate.DepartmentId, DepartmentUpdate);
+            await OnDepartmentEdit.InvokeAsync(DepartmentUpdate);
             dialogService.Close(DepartmentUpdate);
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -58,9 +63,10 @@
         {
             if (await dialogService.Confirm("Are you sure you want to delete this record?") == true)
             {
-                departmantRepository.DeleteElement(DepartmentUpdate.DepartmentId);
+                await OnDepartmentRemove.InvokeAsync(DepartmentUpdate);
                 dialogService.Close(null);
-            }
+                StateHasChanged();
+             }
         }
         catch (Exception ex)
         {

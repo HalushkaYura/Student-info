@@ -2,5 +2,5 @@
 AS
 BEGIN
     SELECT TOP 1 * FROM [dbo].[Departments]
-    ORDER BY [DepartmentsId] DESC;
+    ORDER BY [DepartmentId] DESC;
 END;

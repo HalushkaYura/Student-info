@@ -1,6 +1,6 @@
 ﻿namespace StudentInfo.Model.DTOs
 {
-    public class DepartmantCreate
+    public class DepartmentCreate
     {
         public string Name { get; set; }
     }

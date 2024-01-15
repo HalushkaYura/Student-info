@@ -7,5 +7,5 @@ BEGIN
     UPDATE [dbo].[Departments]
     SET [Name] = @Name,
         [FacultyId] = @FacultyId
-    WHERE [DepartmentsId] = @DepartmentId;
+    WHERE [DepartmentId] = @DepartmentId;
 END;

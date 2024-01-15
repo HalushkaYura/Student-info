@@ -70,7 +70,11 @@
                             <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
                                           Shade="Shade.Lighter" Variant="Variant.Flat"
                                           Click="@((args) => GridDeleteFacultyButtonClick(args, faculty))" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="open_in_browser" Size="ButtonSize.Medium"
+                                          Shade="Shade.Lighter" Variant="Variant.Flat"
+                                          Click="@((args) => OpenPotap(faculty))" />
                         </Template>
+
                     </RadzenDataGridColumn>
                 </Columns>
 
@@ -104,6 +108,7 @@
     {
 
         faculties = facultyRepository.GetAllElements().ToList();
+        // departments = departmentRepository.GetAllElements().Where(dep => dep.FacultyId == Fa).ToList();
         StateHasChanged();
     }
     private void RefreshDepartmant()
@@ -124,7 +129,7 @@
         new DialogOptions() { Width = "400px", Height = "400px", Resizable = false, Draggable = false });
         await grid0.Reload();
         RefreshTable();
-        RefreshDepartmant();
+        //RefreshDepartmant();
     }
 
     protected async Task EditRow(object args)
@@ -166,35 +171,17 @@
     
     //------------------------------------------------------------------------------
     
-    protected async Task GridDeleteDepartmantClick(object args, Department departmant)
-    {
-        try
-        {
-            if (await dialogService.Confirm("Are you sure you want to delete this record?") == true)
-            {
-                var deleteResult = departmentRepository.DeleteElement(departmant.DepartmentId);
-
-                if (deleteResult != null)
-                {
-                    RefreshDepartmant();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            notificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = $"Error",
-                    Detail = $"Unable to delete Faculty"
-                });
-        }
-    }
 
     private List<Department> GetDepartmentsForFaculty(int facultyId)
     {
         return departments.Where(d => d.FacultyId == facultyId).ToList();
     }
+    private async Task OpenPotap(Faculty faculty)
+    {
+        await dialogService.OpenAsync("Open popap", ds => @<OpenPopupGPA FacultyId="faculty.FacultyId" />,
+        new DialogOptions() { Width = "400px", Height = "400px", Resizable = false, Draggable = false });
+        await grid0.Reload();
 
+    }
 }
 

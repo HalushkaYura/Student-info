@@ -2,14 +2,13 @@
 @using StudentInfo.Model
 @using StudentInfo.Model.DTOs
 @inject Radzen.DialogService dialogService
-@inject IBaseRepository<Department> departmantRepository
 
 <RadzenStack>
     <PageTitle>Add Departmant</PageTitle>
 </RadzenStack>
 <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Departmant</RadzenAlert>
-    <RadzenTemplateForm TItem="DepartmantCreate" Data="@departmant" Visible="@(departmant!= null)" Submit="@FormSubmit">
+    <RadzenTemplateForm TItem="DepartmentCreate" Data="@departmant" Visible="@(departmant!= null)" Submit="@FormSubmit">
 
         <RadzenFormField Text="Назва">
             <RadzenTextBox @bind-Value="@departmant.Name" Name="Name" />
@@ -25,14 +24,16 @@
 
 
 @code {
-    [Parameter] public EventCallback<DepartmantCreate> OnDepartmentCreated { get; set; }
+    [Parameter] 
+    public EventCallback<DepartmentCreate> OnDepartmentCreated { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        departmant = new DepartmantCreate();
+        departmant = new DepartmentCreate();
     }
 
     protected bool errorVisible;
-    protected DepartmantCreate departmant;
+    protected DepartmentCreate departmant;
     protected async Task FormSubmit()
     {
         try

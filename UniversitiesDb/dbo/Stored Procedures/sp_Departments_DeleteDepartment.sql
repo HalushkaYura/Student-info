@@ -3,5 +3,5 @@
 AS
 BEGIN
     DELETE FROM [dbo].[Departments]
-    WHERE [DepartmentsId] = @DepartmentId;
+    WHERE [DepartmentId] = @DepartmentId;
 END;

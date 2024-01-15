@@ -69,7 +69,7 @@
 
     private bool errorVisible;
     private Faculty faculty;
-    private List<DepartmantCreate> listDepartmants = new List<DepartmantCreate>();
+    private List<DepartmentCreate> listDepartmants = new List<DepartmentCreate>();
 
 
     protected override async Task OnInitializedAsync()
@@ -89,8 +89,7 @@
                 {
                         Name = department.Name,
                         FacultyId = createdFacultyId,
-                }
-    );
+                });
             }
 
             dialogService.Close(faculty);
@@ -104,7 +103,7 @@
 
     protected async Task CancelButtonClick(MouseEventArgs args)
     {
-        var copyOfDepartmants = new List<DepartmantCreate>(listDepartmants);
+        var copyOfDepartmants = new List<DepartmentCreate>(listDepartmants);
 
         foreach (var dep in copyOfDepartmants)
         {
@@ -115,16 +114,16 @@
 
     protected async Task AddDepartmantButtonClick(MouseEventArgs args)
     {
-        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartmant" />,
+        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartmant" Id="-1"/>,
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
     }
 
-    protected async Task AddNewDepartmant(DepartmantCreate departmantCreate)
+    protected async Task AddNewDepartmant(DepartmentCreate departmantCreate)
     {
         listDepartmants.Add(departmantCreate);
     }
 
-    protected async Task RemoveDepartment(DepartmantCreate departmantRemove)
+    protected async Task RemoveDepartment(DepartmentCreate departmantRemove)
     {
         listDepartmants.Remove(departmantRemove);
     }

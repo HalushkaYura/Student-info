@@ -1,0 +1,40 @@
+﻿@using StudentInfo.Interfaces.IRepositories
+@using StudentInfo.Model
+
+@inject IBaseRepository<StudentInfo.Model.Group> groupRepository
+
+
+<div Class="rz-p-0 rz-p-md-12">
+    <RadzenChart>
+        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" />
+        <RadzenChartTooltipOptions Visible="false" />
+    </RadzenChart>
+</div>
+
+@code {
+    [Parameter]
+    public int FacultyId { get; set; }
+
+    class DataItem
+    {
+        public string Quarter { get; set; }
+        public decimal Revenue { get; set; }
+    }
+    private IEnumerable<StudentInfo.Model.Group> groups;
+    private List<DataItem> revenue = new List<DataItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        groups = groupRepository.GetAllElements().Where(d => d.FacultyId == FacultyId).ToList();
+
+        foreach(var group in groups)
+        {
+            DataItem dataItem = new DataItem
+            {
+                Quarter = group.Name,
+                Revenue = group.GPA
+            };
+            revenue.Add(dataItem);
+        }
+    }
+}
