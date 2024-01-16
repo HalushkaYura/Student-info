@@ -3,7 +3,6 @@
 @using StudentInfo.Model.DTOs
 @using StudentInfo.Pages.Faculty
 @using StudentInfo.Pages.Department
-
 @inject Radzen.DialogService dialogService
 @inject IBaseRepository<Faculty> facultyRepository
 @inject IBaseRepository<Department> departmantRepository
@@ -47,9 +46,7 @@
                                     @departmentModel.Name
                                 </div>
                                 <div class="col col-3">
-                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => RemoveDepartment(departmentModel)">
-                                        <span class="oi oi-x" aria-hidden="true"></span>
-                                    </RadzenButton>
+                                    <RadzenButton Icon = "delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => RemoveDepartment(departmentModel)"></RadzenButton>
                                 </div>
                             </div>
                         </li>
@@ -114,7 +111,7 @@
 
     protected async Task AddDepartmantButtonClick(MouseEventArgs args)
     {
-        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartmant" Id="-1"/>,
+        await dialogService.OpenAsync("Add Faculty", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartmant"/>,
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
     }
 

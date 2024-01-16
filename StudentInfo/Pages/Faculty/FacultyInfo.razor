@@ -27,7 +27,7 @@
         </RadzenColumn>
         <RadzenColumn SizeMD=12>
             <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
-                            Data="@faculties" TItem="Faculty">
+                            Data="@faculties" TItem="Faculty" RowSelect="@EditRow">
                 <Columns>
                     <RadzenDataGridColumn TItem="Faculty" Property="FacultyId" Title="Faculty Id">
                     </RadzenDataGridColumn>
@@ -39,25 +39,6 @@
                     </RadzenDataGridColumn>
 
                     <RadzenDataGridColumn TItem="Faculty" Title="Department" Sortable="false" Filterable="false" Width="300px">
-
-@*                         <Template Context="departments = @(GetDepartmentsForFaculty(faculty.FacultyId))">
-                           @if (departments.Count() != 0)
-                           {
-                               <RadzenFieldset Text="Departments:">
-                                   @foreach (var departmentModel in departments)
-                                   {
-                                       <div class="row wrap-text" style="overflow:auto; max-height:100px;">
-                                          <RadzenIcon Icon="label" style="margin-right: 5px;" />
-                                          <div class="col col-9">
-                                              @departmentModel.Name
-                                          </div>
-                                       </div>
-                                   }
-                               </RadzenFieldset>
-                           }
-                        </Template> *@
-
-
                         <Template Context="faculty">
                             <RadzenListBox @bind-Value="@selectedDepartment" Data="@GetDepartmentsForFaculty(faculty.FacultyId)" TextProperty="Name" ValueProperty="Name" 
                                            Style="width: 100%; max-height: 100px; overflow-y: auto; white-space: normal; word-wrap: break-word; white-space]"
@@ -83,13 +64,13 @@
                         <Template Context="faculty">
                             <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="edit" Size="ButtonSize.Medium"
                                           Shade="Shade.Lighter" Variant="Variant.Flat"
-                                          Click="@((args) => EditRow(faculty))" />
+                                          Click="@((args) => EditRow(faculty))" @onclick:stopPropagation="true" />
                             <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
                                           Shade="Shade.Lighter" Variant="Variant.Flat"
-                                          Click="@((args) => GridDeleteFacultyButtonClick(args, faculty))" />
+                                          Click="@((args) => GridDeleteFacultyButtonClick(args, faculty))" @onclick:stopPropagation="true" />
                             <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="open_in_browser" Size="ButtonSize.Medium"
                                           Shade="Shade.Lighter" Variant="Variant.Flat"
-                                          Click="@((args) => OpenPotap(faculty))" />
+                                          Click="@((args) => OpenPotap(faculty))" @onclick:stopPropagation="true" />
                         </Template>
 
                     </RadzenDataGridColumn>

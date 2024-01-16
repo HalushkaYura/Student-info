@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
-using StudentInfo.Data;
 using StudentInfo.Interfaces.IRepositories;
 using StudentInfo.Model;
 using StudentInfo.Repositories;
