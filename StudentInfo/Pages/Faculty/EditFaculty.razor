@@ -39,27 +39,26 @@
         @if (departments.Count() != 0)
         {
             <RadzenFieldset Text="Departments:">
-                <ul>
-                    @foreach (var departmentModel in listNewDepartments)
+                @foreach (var departmentModel in departments)
                     {
-                        <li>
-                            <div class="row">
-                                <div class="col col-9">
+                            <div class="row wrap-text" style="overflow:auto; max-height:100px;">
+                                <div class="col col-9"  style="display: flex; align-items: flex-start;">
+                            
+                                    <RadzenIcon Icon="label" style="margin-right: 5px;" />
                                     @departmentModel.Name
                                 </div>
                                 <div class="col col-3">
-                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="() => EditDepartment(departmentModel)">
-                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                    <RadzenButton  Icon="edit"  ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.ExtraSmall" Click="() => EditDepartment(departmentModel.DepartmentId)">
+                                    </RadzenButton>
+                                    <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Click="() => RemoveDepartment(departmentModel)">
                                     </RadzenButton>
                                 </div>
                             </div>
-                        </li>
                     }
-                </ul>
             </RadzenFieldset>
         }
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem">
-            <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" />
+@*             <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" /> *@
             <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
         </RadzenStack>
     </RadzenTemplateForm>
@@ -67,29 +66,13 @@
 @code {
     [Parameter] public int Id { get; set; }
     private List<Department> departments;
-    // private List<DepartmentCreate> originDepartments;
-    private List<DepartmentCreate> listNewDepartments = new List<DepartmentCreate>();
+    private List<Department> listNewDepartments = new List<Department>();
 
     protected override async Task OnInitializedAsync()
     {
         faculty = FacultyRepository.GetElementById(Id);
-        departments = departmentRepository.GetAllElements().Where(d => d.FacultyId == Id).ToList();
-        foreach(var i in departments)
-        {
-            DepartmentCreate dep = new DepartmentCreate
-            {
-                Name = i.Name
-            };
-            await NewDepartment(dep);
-        }
+        await RefreshTable();    
     }
-
-    // private void RefreshTable()
-    // {
-    //     faculty = FacultyRepository.GetElementById(Id);
-    //     departments = departmentRepository.GetAllElements().Where(d => d.FacultyId == Id).ToList();
-    //     StateHasChanged();
-    // }
 
     protected bool errorVisible;
     protected Faculty faculty;
@@ -100,11 +83,6 @@
         {
 
             FacultyRepository.UpdateElement(Id, faculty);
-            await CleaningDB();
-            foreach(var i in listNewDepartments)
-            {
-                await AddNewDepartment(i);
-            }
             dialogService.Close(faculty);
             StateHasChanged();
         }
@@ -114,11 +92,15 @@
         }
     }
 
-    protected async Task CancelButtonClick(MouseEventArgs args)
-    {
-        dialogService.Close(null);
-        // RefreshTable();
-    }
+    // protected async Task CancelButtonClick(MouseEventArgs args)
+    // {
+    //     List<Department> copyListNewDepartment = new List<Department>(listNewDepartments);
+    //     foreach (var i in copyListNewDepartment)
+    //     {
+    //         await RemoveDepartment(i);
+    //     }
+    //     dialogService.Close(null);
+    // }
 
     protected async Task AddNewDepartment(DepartmentCreate departmantCreate)
     {
@@ -127,47 +109,39 @@
                     Name = departmantCreate.Name,
                     FacultyId = Id
                 };
-
+        listNewDepartments.Add(obj);
         departmentRepository.CreateElement(obj);
+        await RefreshTable();
     }
 
-
-    protected async Task RemoveDepartment(DepartmentCreate departmantRemove)
+    protected async Task RefreshTable()
     {
-        listNewDepartments.Remove(departmantRemove);
-        // RefreshTable();
+        departments = departmentRepository.GetAllElements().Where(d => d.FacultyId == Id).ToList();
+    }
+    protected async Task RemoveDepartment(Department departmantRemoveId)
+    {
+        departmentRepository.DeleteElement(departmantRemoveId.DepartmentId);
+        listNewDepartments.Remove(departmantRemoveId);
+        await RefreshTable();
     }
 
-    protected async Task CleaningDB()
-    {
-        foreach(var dep in departments)
-        {
-            departmentRepository.DeleteElement(dep.DepartmentId);
-        }
-    }
 
     protected async Task AddDepartmantButtonClick(MouseEventArgs args)
     {
 
-        await dialogService.OpenAsync("Add Department", ds => @<AddDepartment OnDepartmentCreated="NewDepartment" />,
+        await dialogService.OpenAsync("Add Department", ds => @<AddDepartment OnDepartmentCreated="AddNewDepartment" />,
         new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
+        await RefreshTable();
     }
 
 
-    protected async Task EditDepartment(DepartmentCreate departmentToEdit)
+    protected async Task EditDepartment(int departmentId)
     {
-        await RemoveDepartment(departmentToEdit);
-        await dialogService.OpenAsync("Edit Department", ds => @<EditDepartment  
-                                                                    DepartmentUpdate="departmentToEdit" 
-                                                                    OnDepartmentEdit="NewDepartment" 
-                                                                    OnDepartmentRemove="RemoveDepartment"/>
-    ,
-        new DialogOptions() { Width = "300px", Height = "300px", Resizable = false, Draggable = false });
+        await dialogService.OpenAsync("Edit Department", ds =>@<EditDepartment DepartmentId="departmentId" />,
+
+        new DialogOptions() { Width = "400px", Height = "200px", Resizable = false, Draggable = false });
+        await RefreshTable();
     }
 
-    protected async Task NewDepartment(DepartmentCreate department)
-    {
-        listNewDepartments.Add(department);
-    }
 }
 

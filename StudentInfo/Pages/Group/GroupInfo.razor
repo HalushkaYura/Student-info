@@ -19,12 +19,9 @@
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="6">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
-                <RadzenButton IconColor="Danger" Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Success" IconColor="Danger" Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenColumn>
-    </RadzenRow>
-    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" />
-    <RadzenRow>
         <RadzenColumn SizeMD=12>
             <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
                             Data="@groups" TItem="GroupModel" RowSelect="@EditRow">
@@ -68,16 +65,7 @@
 
     protected RadzenDataGrid<GroupModel> grid0;
 
-    protected string search = "";
-
-    protected async Task Search(ChangeEventArgs args)
-    {
-        search = $"{args.Value}";
-
-        await grid0.GoToPage(0);
-
-        RefreshTable();
-    }
+  
     private  string GetFacultyName(int facultyId)
     {
         var faculty = facultyRepository.GetElementById(facultyId);

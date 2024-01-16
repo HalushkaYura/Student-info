@@ -11,16 +11,18 @@
 
 <RadzenStack>
     <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Department</RadzenAlert>
-    <RadzenTemplateForm TItem="DepartmentCreate" Data="@DepartmentUpdate" Visible="@(DepartmentUpdate != null)" Submit="@FormSubmit">
-
-        <RadzenFormField Text="Назва">
-            <RadzenTextBox @bind-Value="@DepartmentUpdate.Name" Name="Name" />
-            <RadzenRequiredValidator Component="Name" Text="Обов'язкове поле!" />
-        </RadzenFormField>
+    <RadzenTemplateForm TItem="Department" Data="@department" Visible="@(department != null)" Submit="@FormSubmit">
+       
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Назва">
+                <RadzenTextBox @bind-Value="@department.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="Обов'язкове поле!" />
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="delete" Click="DeleteDepartment" />
+            </RadzenFormField>
+        </RadzenColumn>
 
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem " Style="padding: 5px">
             <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
-            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Text="Delete" Click="DeleteDepartment" />
             <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" /> 
         </RadzenStack>
 
@@ -29,20 +31,23 @@
 
 @code {
     [Parameter] 
-    public DepartmentCreate DepartmentUpdate { get; set; }
+    public int DepartmentId { get; set; }
     [Parameter] 
     public EventCallback<DepartmentCreate> OnDepartmentEdit { get; set; }
     [Parameter]
     public EventCallback<DepartmentCreate> OnDepartmentRemove { get; set; }
-
+    private Department department;
     protected bool errorVisible;
-
+    protected override async Task OnInitializedAsync()
+    {
+        department = departmentRepository.GetElementById(DepartmentId);
+    }
     protected async Task FormSubmit()
     {
         try
         {
-            await OnDepartmentEdit.InvokeAsync(DepartmentUpdate);
-            dialogService.Close(DepartmentUpdate);
+            departmentRepository.UpdateElement(DepartmentId, department);
+            dialogService.Close(department);
             StateHasChanged();
         }
         catch (Exception ex)
@@ -63,7 +68,7 @@
         {
             if (await dialogService.Confirm("Are you sure you want to delete this record?") == true)
             {
-                await OnDepartmentRemove.InvokeAsync(DepartmentUpdate);
+                departmentRepository.DeleteElement(DepartmentId);
                 dialogService.Close(null);
                 StateHasChanged();
              }

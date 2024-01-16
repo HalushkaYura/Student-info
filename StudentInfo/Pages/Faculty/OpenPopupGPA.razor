@@ -4,10 +4,10 @@
 @inject IBaseRepository<StudentInfo.Model.Group> groupRepository
 
 
-<div Class="rz-p-0 rz-p-md-12">
+<div class="rz-p-0 rz-p-md-12">
     <RadzenChart>
-        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" />
-        <RadzenChartTooltipOptions Visible="false" />
+        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" Fill="@GetRandomColor()" />
+        <RadzenLegend Position="LegendPosition.Top" />
     </RadzenChart>
 </div>
 
@@ -20,6 +20,7 @@
         public string Quarter { get; set; }
         public decimal Revenue { get; set; }
     }
+
     private IEnumerable<StudentInfo.Model.Group> groups;
     private List<DataItem> revenue = new List<DataItem>();
 
@@ -36,5 +37,11 @@
             };
             revenue.Add(dataItem);
         }
+    }
+    private Random random = new Random();
+
+    private string GetRandomColor()
+    {
+        return $"rgb({random.Next(0, 256)}, {random.Next(0, 256)}, {random.Next(0, 256)})";
     }
 }

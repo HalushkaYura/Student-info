@@ -22,12 +22,9 @@
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="6">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
-                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenColumn>
-    </RadzenRow>
-    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="Search" />
-    <RadzenRow>
         <RadzenColumn SizeMD=12>
             <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
                             Data="@faculties" TItem="Faculty">
@@ -42,6 +39,25 @@
                     </RadzenDataGridColumn>
 
                     <RadzenDataGridColumn TItem="Faculty" Title="Department" Sortable="false" Filterable="false" Width="300px">
+
+@*                         <Template Context="departments = @(GetDepartmentsForFaculty(faculty.FacultyId))">
+                           @if (departments.Count() != 0)
+                           {
+                               <RadzenFieldset Text="Departments:">
+                                   @foreach (var departmentModel in departments)
+                                   {
+                                       <div class="row wrap-text" style="overflow:auto; max-height:100px;">
+                                          <RadzenIcon Icon="label" style="margin-right: 5px;" />
+                                          <div class="col col-9">
+                                              @departmentModel.Name
+                                          </div>
+                                       </div>
+                                   }
+                               </RadzenFieldset>
+                           }
+                        </Template> *@
+
+
                         <Template Context="faculty">
                             <RadzenListBox @bind-Value="@selectedDepartment" Data="@GetDepartmentsForFaculty(faculty.FacultyId)" TextProperty="Name" ValueProperty="Name" 
                                            Style="width: 100%; max-height: 100px; overflow-y: auto; white-space: normal; word-wrap: break-word; white-space]"
@@ -55,6 +71,7 @@
                             </RadzenListBox>
                         </Template>
                     </RadzenDataGridColumn>
+
 
                     <RadzenDataGridColumn TItem="Faculty" Property="Note" Title="Note" Width="200px" TextAlign="TextAlign.Left">
                         <Template Context="faculty">
@@ -93,21 +110,12 @@
     private List<Department> departments;
     private string selectedDepartment;
 
-    protected string search = "";
-
-    protected async Task Search(ChangeEventArgs args)
-    {
-        search = $"{args.Value}";
-
-        await grid0.GoToPage(0);
-
-        RefreshTable();
-    }
 
     private void RefreshTable()
     {
 
         faculties = facultyRepository.GetAllElements().ToList();
+        departments = departmentRepository.GetAllElements().ToList();
         // departments = departmentRepository.GetAllElements().Where(dep => dep.FacultyId == Fa).ToList();
         StateHasChanged();
     }

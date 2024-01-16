@@ -21,9 +21,7 @@
                 <RadzenButton ButtonStyle="ButtonStyle.Success"  Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenColumn>
-    </RadzenRow>
-    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" />
-    <RadzenRow>
+
         <RadzenColumn SizeMD=12>
             <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
                             Data="@students" TItem="Student" RowSelect="@EditRow">
@@ -84,16 +82,7 @@
 
     protected RadzenDataGrid<Student> grid0;
 
-    protected string search = "";
-
-    protected async Task Search(ChangeEventArgs args)
-    {
-        search = $"{args.Value}";
-
-        await grid0.GoToPage(0);
-
-        await RefreshTable();
-    }
+ 
     protected override async Task OnInitializedAsync()
     {
         students = studentRepositoty.GetAllElements();

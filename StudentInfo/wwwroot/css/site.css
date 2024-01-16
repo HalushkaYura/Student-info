@@ -68,5 +68,10 @@ a, .btn-link {
     }
 
 .wrap-text {
-    white-space: normal; /* ??? pre-wrap */
+    white-space: normal; 
 }
+
+.custom-chart {
+    margin-right: 20px; 
+}
+
